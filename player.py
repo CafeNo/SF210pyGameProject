@@ -43,7 +43,8 @@ class Player(pygame.sprite.Sprite):
         self.playerSprite = pygame. transform.scale(
             self.playerSprite, (64, 64))
         self.playerSprite_rect = self.playerSprite.get_rect()
-        self.image = pygame.Surface((64, 74))
+        self.image = pygame.Surface((64, 74), pygame.SRCALPHA, 32)
+        self.image = self.image.convert_alpha()
 
         self.rect = self.image.get_rect()
 
