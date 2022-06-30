@@ -16,7 +16,8 @@ class GameScreen:
         self.gameScreen_size: Tuple[int, int] = (743, 721)
         self.sideScreen_size = (
             math.ceil((self.screen_size[0]-self.gameScreen_size[0])/2)-1, 721)
-        self.font = pygame.font.Font("./assets/fonts/CrimsonText-Regular.ttf", 24)
+        self.font = pygame.font.Font(
+            "./assets/fonts/CrimsonText-Regular.ttf", 24)
 
         self.screen: 'pygame.Surface' = pygame.display.set_mode(
             self.screen_size)
