@@ -6,12 +6,14 @@ import sys
 import math
 from Enemy import Enemy
 import random
+from lifeAfterDead import lifeAfterDead
 
 
 class GameScreen:
 
-    def __init__(self) -> None:
+    def __init__(self, loginScreen) -> None:
         # Use This case of having multiple screens
+        self.loginScreen = loginScreen
         self.screen_size = (1000, 721)
         self.gameScreen_size: Tuple[int, int] = (743, 721)
         self.sideScreen_size = (
@@ -128,7 +130,7 @@ class GameScreen:
         self.sideScreen.blit(self.score_text, self.score_rect)
         # self.sideScreen.blit(self.score_text, (self.sideScreen_rect.width/2 - self.sek, 0))
         self.screen.blit(self.sideScreen, (self.rect.width +
-                         self.sideScreen_size[0], 0))
+                                           self.sideScreen_size[0], 0))
 
     def run_game_event_loop(self) -> None:
         """
@@ -276,6 +278,7 @@ class GameScreen:
                 enemy_bullet.kill()
                 if self.player.hp <= 0:
                     self.player.kill()
+                    lifeAfterDead(self.loginScreen)
 
                     # self.game_over()
 

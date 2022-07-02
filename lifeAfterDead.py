@@ -2,12 +2,11 @@ import pygame
 import cv2
 from pygame import mixer
 from components.Button import Button
-from Gamescreen import GameScreen
 
 import sys
 
 
-class PlayMenu:
+class lifeAfterDead:
 
     def __init__(self, loginScreen) -> None:
 
@@ -62,9 +61,8 @@ class PlayMenu:
                 if event.type == pygame.MOUSEBUTTONUP:
                     if self.btn_play.checkForInput(self.mouse_pos):
                         print("Onclicked-play")
-                        mixer.music.stop()
+                        # mixer.music.stop()
 
-                        GameScreen(self.loginScreen)
                         # mixer.music.pause() # pause bgm
 
                     if self.btn_max_score.checkForInput(self.mouse_pos):
