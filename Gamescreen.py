@@ -11,9 +11,10 @@ from lifeAfterDead import lifeAfterDead
 
 class GameScreen:
 
-    def __init__(self, loginScreen) -> None:
+    def __init__(self, loginScreen, playMenu) -> None:
         # Use This case of having multiple screens
         self.loginScreen = loginScreen
+        self.playMenu = playMenu
         self.screen_size = (1000, 721)
         self.gameScreen_size: Tuple[int, int] = (743, 721)
         self.sideScreen_size = (
@@ -278,7 +279,7 @@ class GameScreen:
                 enemy_bullet.kill()
                 if self.player.hp <= 0:
                     self.player.kill()
-                    lifeAfterDead(self.loginScreen)
+                    lifeAfterDead(self.loginScreen, self.playMenu)
 
                     # self.game_over()
 

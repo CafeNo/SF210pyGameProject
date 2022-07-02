@@ -64,7 +64,7 @@ class PlayMenu:
                         print("Onclicked-play")
                         mixer.music.stop()
 
-                        GameScreen(self.loginScreen)
+                        GameScreen(self.loginScreen, PlayMenu)
                         # mixer.music.pause() # pause bgm
 
                     if self.btn_max_score.checkForInput(self.mouse_pos):

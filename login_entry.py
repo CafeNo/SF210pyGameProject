@@ -3,7 +3,6 @@ import pygame
 import cv2
 from pygame import mixer
 from components.Button import Button
-from Gamescreen import GameScreen
 import sys
 from playMenu import PlayMenu
 class LoginEntry:
