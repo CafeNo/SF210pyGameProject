@@ -7,27 +7,34 @@ import math
 from Enemy import Enemy
 import random
 from lifeAfterDead import lifeAfterDead
+from pygame import mixer
 
 
 class GameScreen:
 
     def __init__(self, loginScreen, playMenu) -> None:
+
+        mixer.music.stop()
+
         # Use This case of having multiple screens
         self.loginScreen = loginScreen
         self.playMenu = playMenu
+
+        self.font = pygame.font.Font(
+            "./assets/fonts/CrimsonText-Regular.ttf", 24)
         self.screen_size = (1000, 721)
+        # center of screen that player can play
         self.gameScreen_size: Tuple[int, int] = (743, 721)
         self.sideScreen_size = (
             math.ceil((self.screen_size[0]-self.gameScreen_size[0])/2)-1, 721)
-        self.font = pygame.font.Font(
-            "./assets/fonts/CrimsonText-Regular.ttf", 24)
 
         self.screen: 'pygame.Surface' = pygame.display.set_mode(
             self.screen_size)
         self.screen_rect = self.screen.get_rect()
-        # self.screen = screen
+
         self.clock = pygame.time.Clock()
 
+        # game page animation( by looping ) background
         self.bg_width = 1000
         self.bg_height = 4248.8
         self.bg = pygame.image.load('./assets/bg.png')
@@ -40,21 +47,24 @@ class GameScreen:
         self.bg_y2: int = -4248.8
         self.reset()
 
+        # load black tab aside the screen from this.fuction -> drawSideScreen
         self.sideScreen = self.drawSideScreen()
         self.sideScreen_rect = self.sideScreen.get_rect()
 
-        self.gameScrenCanvas = self.drawGameScreen()
-        self.rect = self.gameScrenCanvas.get_rect()
+        # center of screen that player can play
+        self.gameScreenCanvas = self.drawGameScreen()
+        self.rect = self.gameScreenCanvas.get_rect()
         self.player = Player(
-            self.rect.width/2, self.rect.height-74, 10, self.gameScrenCanvas)
+            self.rect.width/2, self.rect.height-74, 10, self.gameScreenCanvas)
 
+        # seperate team ! player vs enemy !
         self.player_group = pygame.sprite.Group()
         self.player_group.add(self.player)
         self.bullet_group = pygame.sprite.Group()
         self.enemy_bullet_group = pygame.sprite.Group()
         self.enemy_group = pygame.sprite.Group()
         self.enemy_group.add(
-            Enemy(self.rect.width/2, 0, self.gameScrenCanvas, 100))
+            Enemy(self.rect.width/2, 0, self.gameScreenCanvas, 100))
 
         # Game Internal State for game logic
         self.moveState: List[str] = []
@@ -63,14 +73,17 @@ class GameScreen:
         self.score = 0
         self.level = 1
 
+        # game screen display decoration ! score !
         self.score_label = self.font.render(
             "Score:", True, (255, 255, 255))
         self.score_text = self.font.render(
             str(self.score), True, (255, 255, 255))
         self.score_label_rect = self.score_label.get_rect()
-        self.score_label_rect.center = (self.sideScreen_rect.width/2, 50)
+        self.score_label_rect.center = (
+            self.screen.get_width()-(self.sideScreen_rect.width/2), 50)
         self.score_rect = self.score_text.get_rect()
 
+        # game screen display decoration ! Level !
         self.level_label = self.font.render("Level:", True, (255, 255, 255))
         self.level_label_rect = self.level_label.get_rect()
         self.level_text = self.font.render(
@@ -78,6 +91,7 @@ class GameScreen:
         self.level_text_rect = self.level_text.get_rect()
         self.level_label_rect.center = (self.sideScreen_rect.width/2, 50)
         self.level_text_rect.center = (self.sideScreen_rect.width/2, 80)
+
         # self.magicNumberRatio = 1000 - 743 - 128 - 128
         self.enemy_spawn_rate = 0.01
         self.enemy_spawn_rate_increase = 0.0025
@@ -90,22 +104,22 @@ class GameScreen:
         This method performs the drawing of the game screen Canvas and inherited call the lifecycle Methods of child instance. (Life cycle -> draw -> update).
         """
 
-        self.gameScrenCanvas = self.drawGameScreen()
+        self.gameScreenCanvas = self.drawGameScreen()
 
-        self.player_group.draw(self.gameScrenCanvas)
+        self.player_group.draw(self.gameScreenCanvas)
 
-        self.bullet_group.draw(self.gameScrenCanvas)
+        self.bullet_group.draw(self.gameScreenCanvas)
 
-        self.enemy_group.draw(self.gameScrenCanvas)
-        self.enemy_bullet_group.draw(self.gameScrenCanvas)
+        self.enemy_group.draw(self.gameScreenCanvas)
+        self.enemy_bullet_group.draw(self.gameScreenCanvas)
 
         self.screen.blit(self.bg, (self.bg_x, self.bg_y1))
         self.screen.blit(self.bg, (self.bg_x, self.bg_y2))
         self.drawScoreboard()
 
-        self.screen.blit(self.gameScrenCanvas, (self.sideScreen_size[0]+1, 0))
+        self.screen.blit(self.gameScreenCanvas, (self.sideScreen_size[0]+1, 0))
 
-        # inherit draw and update to gameScrenCanvas draw() and update()
+        # inherit draw and update to gameScreenCanvas draw() and update()
 
     # Player Inherit interface for user interaction to player Instance.
 
@@ -116,22 +130,27 @@ class GameScreen:
         return s
 
     def drawScoreboard(self):
+
+        # draw level -> decoration display at point(0,0)
         self.sideScreen = self.drawSideScreen()
         self.level_text = self.font.render(
             str(self.level), True, (255, 255, 255))
-        self.sideScreen.blit(self.level_label, self.level_label_rect)
-        self.sideScreen.blit(self.level_text, self.level_text_rect)
         self.screen.blit(self.sideScreen, (0, 0))
+        self.screen.blit(self.level_label, self.level_label_rect)
+        self.screen.blit(self.level_text, self.level_text_rect)
+
+        # draw level -> decoration display at rightside of screen
         self.sideScreen = self.drawSideScreen()
         self.score_text = self.font.render(
             str(self.score), True, (255, 255, 255))
-        self.sideScreen.blit(self.score_label, self.score_label_rect)
-        self.score_rect.center = (
-            self.sideScreen_rect.width/2, 80)
-        self.sideScreen.blit(self.score_text, self.score_rect)
-        # self.sideScreen.blit(self.score_text, (self.sideScreen_rect.width/2 - self.sek, 0))
         self.screen.blit(self.sideScreen, (self.rect.width +
-                                           self.sideScreen_size[0], 0))
+                         self.sideScreen_size[0], 0))
+        self.screen.blit(self.score_label, self.score_label_rect)
+        self.score_rect.center = (
+            self.screen.get_width()-(self.sideScreen_rect.width/2), 80)
+        self.screen.blit(self.score_text, self.score_rect)
+
+        # self.sideScreen.blit(self.score_text, (self.sideScreen_rect.width/2 - self.sek, 0))
 
     def run_game_event_loop(self) -> None:
         """
@@ -168,6 +187,7 @@ class GameScreen:
                         self.moveState.remove("down")
                     if event.key == pygame.K_SPACE:
                         self.fireState = False
+
             # Render Frame
             self.screen.fill((0, 0, 0))
             self.draw()
@@ -195,15 +215,15 @@ class GameScreen:
 
         if self.fireState and self.player.alive():
             self.bullet_group.add(
-                Bullet(self.player.rect.x+(self.player.rect.width/2)-14, self.player.rect.y-54, 10, (0, -10), "assets/laser/player_laser.png"))
+                Bullet(self.player.rect.x+(self.player.rect.width/2)-14, self.player.rect.y, 10, (0, -10), "assets/lazer/pic_model_lazer_ball.png"))
             self.bullet_group.add(
-                Bullet(self.player.rect.x+(self.player.rect.width/2)-14, self.player.rect.y-54, 10, (3, -10), "assets/laser/player_laser.png"))
+                Bullet(self.player.rect.x+(self.player.rect.width/2)-14, self.player.rect.y, 10, (3, -10), "assets/lazer/pic_model_lazer_ball.png"))
             self.bullet_group.add(
-                Bullet(self.player.rect.x+(self.player.rect.width/2)-14, self.player.rect.y-54, 10, (-3, -10), "assets/laser/player_laser.png"))
+                Bullet(self.player.rect.x+(self.player.rect.width/2)-14, self.player.rect.y, 10, (-3, -10), "assets/lazer/pic_model_lazer_ball.png"))
 
     def update(self) -> None:
         """
-        update state of gameScrenCanvas of blit new  thing to surface
+        update state of gameScreenCanvas of blit new  thing to surface
         """
         self.bg_update()
 
@@ -228,7 +248,7 @@ class GameScreen:
             rand_y = random.randint(0, math.ceil(self.rect.height/2))
             if self.enemy_group.__len__() < self.level * 2.5:
                 self.enemy_group.add(
-                    Enemy(rand_x,  rand_y, self.gameScrenCanvas, 50 * self.level))
+                    Enemy(rand_x,  rand_y, self.gameScreenCanvas, 50 * self.level))
 
     def enemy_fire(self):
         for enemy in self.enemy_group:
@@ -237,7 +257,7 @@ class GameScreen:
                 direction = [random.randint(-1, 1), 1]
 
                 self.enemy_bullet_group.add(
-                    Bullet(enemy.rect.x+(enemy.rect.width/2)-14, enemy.rect.y+enemy.rect.height, 10, (direction[0]*random.randint(1, 5), direction[1]*5), "assets/laser/player_laser.png"))
+                    Bullet(enemy.rect.x+(enemy.rect.width/2)-14, enemy.rect.y+enemy.rect.height, 10, (direction[0]*random.randint(1, 5), direction[1]*5), "assets/lazer/pic_enemy_lazer_ball.png"))
                 enemy.isFire = False
 
     def hit_detection(self):
@@ -261,7 +281,7 @@ class GameScreen:
                                   self.enemy_spawn_rate)
 
                         # self.enemy_group.add(
-                        #     Enemy(self.rect.width/2, 0, self.gameScrenCanvas, 100))
+                        #     Enemy(self.rect.width/2, 0, self.gameScreenCanvas, 100))
 
             if pygame.sprite.collide_rect(enemy, self.player):
                 self.player.hp -= enemy.damage
@@ -279,6 +299,7 @@ class GameScreen:
                 enemy_bullet.kill()
                 if self.player.hp <= 0:
                     self.player.kill()
+                    mixer.music.play()
                     lifeAfterDead(self.loginScreen, self.playMenu)
 
                     # self.game_over()
@@ -295,11 +316,11 @@ class GameScreen:
         """
         This methods draw a game screen Surface.
         """
-        gameScrenCanvas = pygame.Surface(
+        gameScreenCanvas = pygame.Surface(
             self.gameScreen_size, pygame.SRCALPHA, 32)
-        # gameScrenCanvas = gameScrenCanvas.convert()
-        gameScrenCanvas.convert_alpha()
-        return gameScrenCanvas
+        # gameScreenCanvas = gameScreenCanvas.convert()
+        gameScreenCanvas.convert_alpha()
+        return gameScreenCanvas
 
     def bg_update(self) -> None:
         """

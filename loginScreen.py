@@ -4,6 +4,7 @@ from pygame import mixer
 from components.Button import Button
 import sys
 from login_entry import LoginEntry
+from register import Register
 
 # this page composed of 3 classed. < LoginScreen , login_entry, play_menu >
 
@@ -54,11 +55,9 @@ class LoginScreen:
                 if event.type == pygame.MOUSEBUTTONUP:
                     if self.btn_login.checkForInput(self.mouse_pos):
                         LoginEntry(LoginScreen)
-                        print("Onclicked-login")
                         # mixer.music.pause() # pause bgm
                     if self.btn_register.checkForInput(self.mouse_pos):
-                        # gameScreen = GameScreen()
-                        print("Onclicked-register")
+                        Register(LoginScreen)
 
                     if event.type == pygame.MOUSEBUTTONUP:
                         if self.btn_setting.checkForInput(self.mouse_pos):

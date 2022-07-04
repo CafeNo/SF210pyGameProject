@@ -2,39 +2,43 @@ import pygame
 import cv2
 from pygame import mixer
 from components.Button import Button
-from Gamescreen import GameScreen
-from max_score_menu import max_score_menu
 import sys
 
 
-class PlayMenu:
+class max_score_menu:
 
-    def __init__(self, loginScreen) -> None:
-        # mixer.music.play()
+    def __init__(self, play_menu, loginScreen) -> None:
 
         # apicture blit at the bottom of the screen line
         # button input x,y in fuction for blitting.
 
         # load picture and asset
         self.loginScreen = loginScreen
+        self.playMenu = play_menu
         self.video = cv2.VideoCapture("./assets/mainmenu/effect0.mov")
         self.success, video_image = self.video.read()
         self.fps = self.video.get(cv2.CAP_PROP_FPS)
+        self.overlay = pygame.image.load(
+            "./assets/login_entry/shadow_overlay.png")
+        self.bg_max_score = pygame.image.load(
+            "./assets/pic_bg_max_score.png")
 
         # create button
         self.window = pygame.display.set_mode(video_image.shape[1::-1])
         self.clock = pygame.time.Clock()
         self.btn_play = Button(self.window, "./assets/play_menu/pic_play.png",
-                               "./assets/play_menu/pic_play_hover.png", 627, 372)
+                               "./assets/play_menu/pic_play.png", 627, 372)
         self.btn_max_score = Button(self.window, "./assets/play_menu/pic_max_score.png",
-                                    "./assets/play_menu/pic_max_score_hover.png", 627, 472)
+                                    "./assets/play_menu/pic_max_score.png", 627, 472)
         self.btn_logout = Button(self.window, "./assets/play_menu/pic_logout.png",
-                                 "./assets/play_menu/pic_logout_hover.png", 627, 574)
+                                 "./assets/play_menu/pic_logout.png", 627, 574)
 
         self.btn_setting = Button(self.window, "./assets/mainmenu/pic_setting.png",
-                                  "./assets/mainmenu/pic_setting_hover.png", 930, 27)
+                                  "./assets/mainmenu/pic_setting.png", 930, 27)
         self.logo_game_name = Button(self.window, "./assets/mainmenu/logo_game_name.png",
                                      "./assets/mainmenu/logo_game_name.png", 507, 131)
+        self.btn_ok2 = Button(self.window, "./assets/pic_ok2.png",
+                              "./assets/pic_ok2_hover.png", 463, 572)
 
         self.rect = self.window.get_rect()
 
@@ -51,9 +55,9 @@ class PlayMenu:
             self.btn_play.isHovered(self.mouse_pos)
             self.btn_max_score.isHovered(self.mouse_pos)
             self.btn_logout.isHovered(self.mouse_pos)
-
             self.btn_setting.isHovered(self.mouse_pos)
             self.logo_game_name.isHovered(self.mouse_pos)
+            self.btn_ok2.isHovered(self.mouse_pos)
 
             # do task according to mouse event
             for event in pygame.event.get():
@@ -63,17 +67,16 @@ class PlayMenu:
                 if event.type == pygame.MOUSEBUTTONUP:
                     if self.btn_play.checkForInput(self.mouse_pos):
                         print("Onclicked-play")
-
-                        GameScreen(self.loginScreen, PlayMenu)
+                        # mixer.music.stop()
                         # mixer.music.pause() # pause bgm
-
                     if self.btn_max_score.checkForInput(self.mouse_pos):
-                        max_score_menu(PlayMenu, self.loginScreen)
                         print("Onclicked-max-score")
                     if self.btn_logout.checkForInput(self.mouse_pos):
-                        self.loginScreen()
                         print("Onclicked-log-out")
                     if self.btn_setting.checkForInput(self.mouse_pos):
+                        print("Onclicked-setting")
+                    if self.btn_ok2.checkForInput(self.mouse_pos):
+                        self.playMenu(self.loginScreen)
                         print("Onclicked-setting")
 
             success, video_image = self.video.read()
@@ -92,5 +95,8 @@ class PlayMenu:
 
             self.btn_setting.draw()
             self.logo_game_name.draw()
+            self.window.blit(self.overlay, (0, 0))
+            self.window.blit(self.bg_max_score, (277, 96))
+            self.btn_ok2.draw()
 
             pygame.display.flip()

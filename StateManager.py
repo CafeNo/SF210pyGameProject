@@ -1,8 +1,8 @@
 from typing import Callable, Dict,Any, Tuple, Union
-def singleton(class_:Callable)->Callable:
+def singleton(class_):
     instances = {}
 
-    def getinstance(*args:Tuple[Tuple,...], **kwargs:Dict[str, Any]):
+    def getinstance(*args, **kwargs):
         if class_ not in instances:
             instances[class_] = class_(*args, **kwargs)
             print("Created new instance of {}".format(class_))
@@ -18,7 +18,7 @@ class StateManager:
     Global State management and persistance.
     """
     def __init__(self):
-        self.store:Dict[str,Any] = Dict()
+        self.store:Dict[str,Any] = dict()
 
 
     def __getitem__(self, key:str) ->Union[Any,None]:

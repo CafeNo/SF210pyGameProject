@@ -2,6 +2,7 @@ import pygame
 import sys
 from typing import List
 from Bullet import Bullet
+from StateManager import StateManager
 
 
 class Player(pygame.sprite.Sprite):
@@ -20,6 +21,7 @@ class Player(pygame.sprite.Sprite):
 
     def __init__(self, pos_x: int, pos_y: int,  speed: int, screen: pygame.Surface) -> None:
         super().__init__()
+        self.store: StateManager = StateManager()
         self.attack_animation = False
         self.screen = screen
         self.screen_width = self.screen.get_width()
@@ -38,10 +40,10 @@ class Player(pygame.sprite.Sprite):
         # self.sprites.append(pygame.image.load('attack_9.png'))
         # self.sprites.append(pygame.image.load('attack_10.png'))
         self.current_sprite: int = 0
-
-        self.playerSprite = pygame.image.load('assets/C.png')
+        self.characterModel = self.store.__getitem__("playerModel")
+        self.playerSprite = pygame.image.load(self.characterModel)
         self.playerSprite = pygame. transform.scale(
-            self.playerSprite, (64, 64))
+            self.playerSprite, (self.playerSprite.get_width()/6, self.playerSprite.get_height()/6))
         self.playerSprite_rect = self.playerSprite.get_rect()
         self.image = pygame.Surface((64, 74), pygame.SRCALPHA, 32)
         self.image = self.image.convert_alpha()
@@ -99,8 +101,8 @@ class Player(pygame.sprite.Sprite):
     def update(self) -> None:
         self.image = pygame.Surface((64, self.playerSprite.get_height()+10))
         self.image.blit(self.playerSprite, (0, 10))
-        pygame.draw.rect(self.image, (0, 255, 0), [
-                         0, 10, self.playerSprite_rect.width, self.playerSprite_rect.height], 2)
+        # pygame.draw.rect(self.image, (0, 255, 0), [
+        #                  0, 10, self.playerSprite_rect.width, self.playerSprite_rect.height], 2)
         self.drawHpbar()
 
         # self.image = self.sprites[int(self.current_sprite)]

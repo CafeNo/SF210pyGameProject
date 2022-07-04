@@ -29,8 +29,8 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = [pos_x, pos_y]
 
-        pygame.draw.rect(self.image, (255, 0, 0), [
-                         0, 0, self.rect.width, self.rect.height], 2)
+        # pygame.draw.rect(self.image, (255, 0, 0), [
+        #                  0, 0, self.rect.width, self.rect.height], 2)
 
     def update(self, speed=1) -> None:
         self.rect.x += self.vec[0]*speed

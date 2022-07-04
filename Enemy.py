@@ -23,8 +23,8 @@ class Enemy(pygame.sprite.Sprite):
        
         self.screen = screen
         self.screen_rect = self.screen.get_rect()
-        self.sprite = pygame.image.load('assets/C.png')
-        self.sprite = pygame. transform. scale(self.sprite, (64, 64))
+        self.sprite = pygame.image.load('assets/minion/pic_minion_enemy.png')
+        self.sprite = pygame. transform. scale(self.sprite, (self.sprite.get_width(), self.sprite.get_height()))
         self.image = pygame.Surface((64,74))
         self.rect = self.image.get_rect()
         self.rect.topleft = [pos_x, pos_y]
@@ -48,8 +48,10 @@ class Enemy(pygame.sprite.Sprite):
         time_now = pygame.time.get_ticks()               # what time is it
         self.image = pygame.Surface((64, self.sprite.get_height()+10))
         self.image.blit(self.sprite, (0, 10))
-        pygame.draw.rect(self.image, (0, 0, 255), [
-                         0, 10, self.rect.width, self.rect.height-10], 2)
+
+        # debug frame
+        # pygame.draw.rect(self.image, (0, 0, 255), [
+        #                  0, 10, self.rect.width, self.rect.height-10], 2)
         self.drawHpbar()
         if ( time_now > self.pace_time + self.speed ):   # is it time to move again
             self.pace_time = time_now
