@@ -13,6 +13,8 @@ class LoginScreen:
 
     def __init__(self) -> None:
 
+        self.clock = pygame.time.Clock()
+
         self.video = cv2.VideoCapture("./assets/mainmenu/effect0.mov")
         self.success, video_image = self.video.read()
         self.fps = self.video.get(cv2.CAP_PROP_FPS)
@@ -21,9 +23,8 @@ class LoginScreen:
         self.overlay = pygame.image.load(
             "./assets/login_entry/shadow_overlay.png")
 
-        # fuction chec btn is hovering, if yes then btn will change to hover picture
+        # fuction check btn is hovering, if yes then btn will change to hover picture
         self.window = pygame.display.set_mode(video_image.shape[1::-1])
-        self.clock = pygame.time.Clock()
         self.btn_login = Button(self.window, "./assets/mainmenu/pic_login.png",
                                 "./assets/mainmenu/pic_login_hover.png", 627, 399)
         self.btn_register = Button(self.window, "./assets/mainmenu/pic_register.png",
@@ -37,7 +38,9 @@ class LoginScreen:
         self.run_login_event_loop()
 
     def run_login_event_loop(self) -> None:
+
         while True:
+
             self.clock.tick(self.fps)
 
             # fuction chec btn is hovering, if yes then btn will change to hover picture
@@ -70,7 +73,7 @@ class LoginScreen:
                 video_surf = pygame.image.frombuffer(
                     video_image.tobytes(), video_image.shape[1::-1], "BGR")
             else:
-                video = cv2.VideoCapture("./assets/mainmenu/effect0.mov")
+                self.video = cv2.VideoCapture("./assets/mainmenu/effect0.mov")
 
             self.window.blit(video_surf, (0, 0))
             self.btn_login.draw()

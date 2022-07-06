@@ -28,7 +28,8 @@ class Bullet(pygame.sprite.Sprite):
         self.damage = damage
         self.rect = self.image.get_rect()
         self.rect.topleft = [pos_x, pos_y]
-
+        
+        # debug frame
         # pygame.draw.rect(self.image, (255, 0, 0), [
         #                  0, 0, self.rect.width, self.rect.height], 2)
 
@@ -36,6 +37,8 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.x += self.vec[0]*speed
         self.rect.y += self.vec[1]*speed
         if self.rect.y < -60:
+            self.kill()
+        if self.rect.x > 720 :
             self.kill()
             # print("Kill Sprite")
         # self.image = self.sprites[int(self.current_sprite)]

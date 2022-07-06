@@ -26,19 +26,11 @@ class Player(pygame.sprite.Sprite):
         self.screen = screen
         self.screen_width = self.screen.get_width()
         self.screen_height = self.screen.get_height()
-        self.hp: int = 100
+        self.hp: int = 1000
+        self.HP: int = 1000
         self.speed = speed
         self.sprites: List[pygame.Surface] = []
-        # self.sprites.append(pygame.image.load('attack_1.png'))
-        # self.sprites.append(pygame.image.load('attack_2.png'))
-        # self.sprites.append(pygame.image.load('attack_3.png'))
-        # self.sprites.append(pygame.image.load('attack_4.png'))
-        # self.sprites.append(pygame.image.load('attack_5.png'))
-        # self.sprites.append(pygame.image.load('attack_6.png'))
-        # self.sprites.append(pygame.image.load('attack_7.png'))
-        # self.sprites.append(pygame.image.load('attack_8.png'))
-        # self.sprites.append(pygame.image.load('attack_9.png'))
-        # self.sprites.append(pygame.image.load('attack_10.png'))
+
         self.current_sprite: int = 0
         self.characterModel = self.store.__getitem__("playerModel")
         self.playerSprite = pygame.image.load(self.characterModel)
@@ -48,6 +40,9 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.Surface((64, 74), pygame.SRCALPHA, 32)
         self.image = self.image.convert_alpha()
 
+        self.playerHP = pygame.image.load("./assets/pic_player_hp_bar.png")
+        self.playerHPBase = pygame.image.load("./assets/pic_hp_base.png")
+
         self.rect = self.image.get_rect()
 
         self.rect.topleft = [pos_x, pos_y]
@@ -55,20 +50,8 @@ class Player(pygame.sprite.Sprite):
         # self.rect.size = [self.playerSprite.get_width(), self.playerSprite.get_height()]
         self.hitbox = [0, 10, self.playerSprite.get_size()]
 
-    # def draw(self):
-    #     """
-    #     Overwrite draw method in Sprite class. cause Of this class use `self.rect` to draw image on screen.
-    #     but we want to use `self.rect_with_hpbar` to draw sprite with hpbar. instreat of `self.rect`
-    #     then use `self.rect` for colider detection
-    #     *** colider detection of sprite class use internal state `self.rect` for detection ***
-    #     (if use `self.rect` for draw sprite then it will cause of colider detection issue , it will detect hit on hpbar )
-
-    #     """
-
-    #     self.screen.blit(self.image, self.rect_with_hpbar)
-
     def moveLeft(self) -> None:
-
+        # 5 is left boarder of screen
         self.rect.x -= self.speed
         if self.rect.x <= 5:
             self.rect.x = 5
@@ -93,16 +76,22 @@ class Player(pygame.sprite.Sprite):
             self.rect.y = self.screen_height - self.rect.height
 
     def drawHpbar(self) -> None:
-        pygame.draw.rect(self.image, (255, 0, 0), [
-                         0, 0, self.playerSprite.get_width(), 5])
-        pygame.draw.rect(self.image, (0, 255, 0), [
-                         0, 0, 64 * (self.hp / 100), 5])
+
+        b = pygame.transform.scale(
+            self.playerHPBase, (self.image.get_width(), 9))
+        a = pygame.transform.scale(
+            self.playerHP, (self.image.get_width() * (self.hp / self.HP), 9))
+        self.image.blit(b, (0, 0))
+        self.image.blit(a, (0, 0))
 
     def update(self) -> None:
         self.image = pygame.Surface((64, self.playerSprite.get_height()+10))
         self.image.blit(self.playerSprite, (0, 10))
+
+        # debug frame
         # pygame.draw.rect(self.image, (0, 255, 0), [
         #                  0, 10, self.playerSprite_rect.width, self.playerSprite_rect.height], 2)
+
         self.drawHpbar()
 
         # self.image = self.sprites[int(self.current_sprite)]

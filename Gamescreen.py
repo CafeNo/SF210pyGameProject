@@ -1,3 +1,4 @@
+
 import pygame
 from player import Player
 from Bullet import Bullet
@@ -8,18 +9,24 @@ from Enemy import Enemy
 import random
 from lifeAfterDead import lifeAfterDead
 from pygame import mixer
+from typing import TYPE_CHECKING
+# from loginScreen import LoginScreen
+if TYPE_CHECKING:
+    from loginScreen import LoginScreen
 
 
 class GameScreen:
 
     def __init__(self, loginScreen, playMenu) -> None:
 
-        mixer.music.stop()
-
         # Use This case of having multiple screens
-        self.loginScreen = loginScreen
-        self.playMenu = playMenu
 
+        # TODO : close menu BGM
+        mixer.Channel(0).pause()
+        mixer.Channel(1).unpause()
+
+        self.loginScreen: LoginScreen = loginScreen
+        self.playMenu = playMenu
         self.font = pygame.font.Font(
             "./assets/fonts/CrimsonText-Regular.ttf", 24)
         self.screen_size = (1000, 721)
@@ -63,8 +70,13 @@ class GameScreen:
         self.bullet_group = pygame.sprite.Group()
         self.enemy_bullet_group = pygame.sprite.Group()
         self.enemy_group = pygame.sprite.Group()
+        self.boss_group = pygame.sprite.Group()
         self.enemy_group.add(
-            Enemy(self.rect.width/2, 0, self.gameScreenCanvas, 100))
+            Enemy(self.rect.width/2, 0, self.gameScreenCanvas, 100,  "./assets/minion/pic_minion_enemy.png"))
+        self.bossSpawn = False
+        self.bossIns = Enemy(0, 0, self.gameScreenCanvas,
+                             1,  "./assets/characterModel/pic_b1_model.png")
+        self.bossIns.kill()
 
         # Game Internal State for game logic
         self.moveState: List[str] = []
@@ -93,9 +105,9 @@ class GameScreen:
         self.level_text_rect.center = (self.sideScreen_rect.width/2, 80)
 
         # self.magicNumberRatio = 1000 - 743 - 128 - 128
-        self.enemy_spawn_rate = 0.01
+        self.enemy_spawn_rate = 0.0095
         self.enemy_spawn_rate_increase = 0.0025
-        self.enemy_spawn_rate_increase_rate = 0.05
+        self.enemy_spawn_rate_increase_rate = 0.0090
         self.killCount = 0
         self.run_game_event_loop()
 
@@ -112,6 +124,7 @@ class GameScreen:
 
         self.enemy_group.draw(self.gameScreenCanvas)
         self.enemy_bullet_group.draw(self.gameScreenCanvas)
+        self.boss_group.draw(self.gameScreenCanvas)
 
         self.screen.blit(self.bg, (self.bg_x, self.bg_y1))
         self.screen.blit(self.bg, (self.bg_x, self.bg_y2))
@@ -125,7 +138,7 @@ class GameScreen:
 
     def drawSideScreen(self):
         s = pygame.Surface(self.sideScreen_size)
-        s.set_alpha(90)
+        s.set_alpha(100)
         s.fill((0, 0, 0))
         return s
 
@@ -212,14 +225,14 @@ class GameScreen:
         player fire the Bullet but creatior of bullet should be the `gameScreen` instance , not `player` instance. Because `gameScreen` instance has Bullet Group that frequently use in game.
         And `gameScreen` instance has information to create `bullet` instance. this fravor following the creator pattern of Grasp priciple.
         """
-
+        # this is for player
         if self.fireState and self.player.alive():
             self.bullet_group.add(
                 Bullet(self.player.rect.x+(self.player.rect.width/2)-14, self.player.rect.y, 10, (0, -10), "assets/lazer/pic_model_lazer_ball.png"))
             self.bullet_group.add(
                 Bullet(self.player.rect.x+(self.player.rect.width/2)-14, self.player.rect.y, 10, (3, -10), "assets/lazer/pic_model_lazer_ball.png"))
             self.bullet_group.add(
-                Bullet(self.player.rect.x+(self.player.rect.width/2)-14, self.player.rect.y, 10, (-3, -10), "assets/lazer/pic_model_lazer_ball.png"))
+                Bullet(self.player.rect.x+(self.player.rect.width/2)-14, self.player.rect.y-54, 10, (-3, -10), "assets/lazer/pic_model_lazer_ball.png"))
 
     def update(self) -> None:
         """
@@ -235,6 +248,7 @@ class GameScreen:
         self.bullet_group.update(2.5)
         self.enemy_bullet_group.update()
         self.enemy_group.update()
+        self.boss_group.update()
         # for enemy in self.enemy_group:
         #     enemy: Enemy
         self.hit_detection()
@@ -242,13 +256,25 @@ class GameScreen:
         self.spawn_enemy()
 
     def spawn_enemy(self):
+        rand_x = random.randint(0, self.rect.width)
+        rand_y = random.randint(0, math.ceil(self.rect.height/2))
+        if self.bossSpawn and self.level % 3 == 0 and not self.bossIns.alive():
+            self.bossSpawn = False
+            # mixer.Channel(0).pause()
+            # mixer.Channel(1).play(mixer.Sound(
+            #     './assets/sound_bgm/FearfulUtopia.mp3'), -1, 5000)
+            print("Boss spawn")
+            self.bossIns = Enemy(rand_x,  rand_y, self.gameScreenCanvas,
+                                 100 * self.level, "./assets/characterModel/pic_b1_model.png")
+
+            self.boss_group.add(self.bossIns
+                                )
+
         if random.random() <= self.enemy_spawn_rate:
 
-            rand_x = random.randint(0, self.rect.width)
-            rand_y = random.randint(0, math.ceil(self.rect.height/2))
-            if self.enemy_group.__len__() < self.level * 2.5:
+            if self.enemy_group.__len__() < math.floor(self.level * 2.5):
                 self.enemy_group.add(
-                    Enemy(rand_x,  rand_y, self.gameScreenCanvas, 50 * self.level))
+                    Enemy(rand_x,  rand_y, self.gameScreenCanvas, 50 * self.level, "./assets/minion/pic_minion_enemy.png"))
 
     def enemy_fire(self):
         for enemy in self.enemy_group:
@@ -257,10 +283,42 @@ class GameScreen:
                 direction = [random.randint(-1, 1), 1]
 
                 self.enemy_bullet_group.add(
-                    Bullet(enemy.rect.x+(enemy.rect.width/2)-14, enemy.rect.y+enemy.rect.height, 10, (direction[0]*random.randint(1, 5), direction[1]*5), "assets/lazer/pic_enemy_lazer_ball.png"))
+                    Bullet(enemy.rect.x+(enemy.rect.width/2)-14, enemy.rect.y+enemy.rect.height, 10, (direction[0]*random.randint(1, 5), direction[1]*5), "assets/lazer/pic_minion_lazer_ball.png"))
                 enemy.isFire = False
 
+        boss = self.bossIns
+
+        if boss.isFire and boss.alive():
+            print("boss skill")
+            direction = [random.uniform(-1.0, 1), 1]
+            magicNumber = random.randrange(0, 2)
+            if magicNumber == 0:
+                for i in range(10):
+                    self.enemy_bullet_group.add(
+                        Bullet(boss.rect.x+(boss.rect.width/2)-14, boss.rect.y+boss.rect.height, 20, (random.uniform(-1.0, 1)*random.randint(1, 5), direction[1]*5), "assets/lazer/pic_enemy_lazer_ball.png"))
+                boss.isFire = False
+            else:
+                for i in range(10):
+                    self.enemy_bullet_group.add(
+                        Bullet(boss.rect.x+(boss.rect.width/2)-14, boss.rect.y+boss.rect.height, 50, (random.uniform(-1.0, 1)*random.randint(1, 5), direction[1]*5), "assets/lazer/boss_laser.png"))
+                boss.isFire = False
+
     def hit_detection(self):
+
+        #  this foi is the boss origin
+        for boss in self.boss_group:
+            mixer.Channel(1).pause()
+            mixer.Channel(2).unpause()
+            for bullet in self.bullet_group:
+                bullet: Bullet
+                if pygame.sprite.collide_rect(boss, bullet):
+                    boss.hp -= bullet.damage
+                    bullet.kill()
+                    if boss.hp <= 0 and boss.alive():
+                        boss.kill()
+                        mixer.Channel(2).pause()
+                        mixer.Channel(1).unpause()
+
         for enemy in self.enemy_group:
             enemy: Enemy
             for bullet in self.bullet_group:
@@ -270,11 +328,19 @@ class GameScreen:
                     bullet.kill()
                     if enemy.hp <= 0 and enemy.alive():
                         enemy.kill()
-                        self.score += 1
-                        self.killCount += 1
-                        self.level = (self.killCount // 10) + 1
+                        if not (self.bossSpawn and self.bossIns.alive()):
+                            self.killCount += 1
+                        oldLevel = self.level
+                        self.level = (self.killCount // 6) + 1
+                        if self.level > oldLevel:
+                            self.bossSpawn = True
+
                         self.enemy_spawn_rate_increase_rate = (
-                            0.03 * self.level)+0.02
+                            0.01 * self.level)+0.001
+
+        # ! count Score at this line !
+                        self.score += 1
+
                         if random.random() < self.enemy_spawn_rate_increase_rate:
                             self.enemy_spawn_rate += self.enemy_spawn_rate_increase
                             print("Spawn rate increated to ",
@@ -288,6 +354,7 @@ class GameScreen:
                 if self.player.hp <= 0:
                     self.player.kill()
                     # self.game_over()
+
         for enemy_bullet in self.enemy_bullet_group:
             for player_bullet in self.bullet_group:
                 if pygame.sprite.collide_rect(enemy_bullet, player_bullet):
@@ -299,7 +366,11 @@ class GameScreen:
                 enemy_bullet.kill()
                 if self.player.hp <= 0:
                     self.player.kill()
-                    mixer.music.play()
+                    # TODO : open menu BGM
+                    mixer.Channel(0).unpause()
+                    mixer.Channel(1).pause()
+                    mixer.Channel(2).pause()
+
                     lifeAfterDead(self.loginScreen, self.playMenu)
 
                     # self.game_over()
@@ -310,7 +381,7 @@ class GameScreen:
             self.fireDurations = 0
         else:
             if self.fireDurations <= 6:
-                self.fireDurations += 1
+                self.fireDurations += 2
 
     def drawGameScreen(self) -> pygame.Surface:
         """
